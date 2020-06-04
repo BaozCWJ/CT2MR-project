@@ -1,5 +1,17 @@
-
-## Usage
+# About CT2MR project
+some introduction
+### Code structure
+* main.py :  The standard workflow to build/train/test a model
+* options.py : The hyperparameters of model and the setting about train/test process
+* util : Some code about data visualization and  processing  for specific models
+* evaluation : Some code about model evalution and data cleaning
+* data : Some code about data loading and preprocess
+* models : A folder where contains different models and network structure，include cycle-gan, pix2pix, nice-gan, unit and a nice-gan variant (mnice-gan).
+**(Contribution Statement)**
+Most of code in **util** and **data** is from the projects in Acknowledgments.
+In the folder **model**, we slightly modified some code of 4 existed models to adapt the standard workflow. Besides, we made some improvement based on nice-gan and named it mnice-gan.
+### Usage
+You should arrange your dataset as the following folder structure
 ```
 ├── dataset
    └── YOUR_DATASET_NAME
@@ -15,9 +27,13 @@
            ├── aaa.jpg
            ├── bbb.png
            └── ...
-       └── testB
+       ├── testB
            ├── ccc.jpg
            ├── ddd.png
+           └── ...
+       └── label (only for nice-gan variant)
+           ├── eee.jpg
+           ├── fff.png
            └── ...
 ```
 ### Prerequisites
@@ -30,13 +46,13 @@
 
 ### Train
 ```
-> python main.py --dataroot ./dataset/cat2dog --name gan1 --model nice_gan
+> python main.py --dataroot ./dataset/ct2mr --name gan1 --model nice_gan
 ```
-* (For nice-gan) If the memory of gpu is **not sufficient**, set `--light` to True
+* (For nice-gan and its variant) If the memory of gpu is **not sufficient**, set `--light`
 
 ### Test
 ```
-> python main.py --dataroot ./dataset/cat2dog --phase test --name gan1 --model nice_gan
+> python main.py --dataroot ./dataset/ct2mr --phase test --name gan1 --model nice_gan
 ```
 
 
@@ -44,3 +60,4 @@
 Our project contains the following model:
 * cycle-gan and pix2pix (https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix)
 * nice-gan (https://github.com/alpc91/NICE-GAN-pytorch)
+* UNIT (https://github.com/mingyuliutw/UNIT)
