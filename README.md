@@ -9,17 +9,17 @@ Finally, we used the imaging features of Stroke's disease and made some modifica
 ## Result
 ### CT to MR translation via four methods
 <div align="center">
-  <img src="./figure/ct2mr.png" width = '586px' height = '367px'>
+  <img src="./figure/ct2mr.jpg" width = '586px' height = '367px'>
 </div>
 
 ### MR to CT translation via four methods
 <div align="center">
-  <img src="./figure/mr2ct.png" width = '586px' height = '367px'>
+  <img src="./figure/mr2ct.jpg" width = '586px' height = '367px'>
 </div>
 
 ### Comparison between stroke-trained NICE-GAN and paired-trained NICE-GAN for restoring nidus
 <div align="center">
-  <img src="./figure/stroke.png" width = '586px' height = '367px'>
+  <img src="./figure/stroke.jpg" width = '586px' height = '367px'>
 </div>
 
 ### Author
