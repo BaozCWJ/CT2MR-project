@@ -1,8 +1,27 @@
 # About CT2MR project
+This project compares the performance of several Image Translation on ordinary CT-MR paired-data, and shows the NICE-GAN's generation performance on the Stroke (unpaired) dataset.
 ## Introduction
-some introduction
-### Result
-some comparisons
+This project compared the performance of Cycle-GAN, PIX2PIX, UNIT (UNsupervised Image-to-image Translation) and NICE-GAN (No-Independent-Component-for-Encoding GAN) on CT to MR image translation task. We made the comparison both on the generative image and usual benchmarks of GAN, which concluded that NICE-GAN has the best performance.
+
+What's more, we use the Stroke dataset (unpaired) to train NICE-GAN  and test it on the paired-unlabelled dataset. Then we compared the test performance of the models trained on Stroke dataset and paired dataset on the test set of paired dataset. For the MR image generation, the Stroke model is not good as paired model , but it can be more clear to restore the inapparent nidus in CT image as the training goes on.
+
+Finally, we used the imaging features of Stroke's disease and made some modifications based on NICE-GAN to make it more suitable for generating specific regional features. We introduced a new type of loss: Pair Loss, that represnts the distance between the CT image and the MR image of the same patient and the same slice. For converting the CT image to the MR image with specific regional features,  we utilize Mask-weighted loss to emphasize the nidus. Mask can be obtained from the segmentation model on the entire classification dataset. This part of the progress has not been carried out due to the necessary authority from hospital and the privacy of data. We only implemented a general framework here.
+## Result
+### CT to MR translation via four methods
+<div align="center">
+  <img src="./figure/ct2mr.png" width = '586px' height = '367px'>
+</div>
+
+### MR to CT translation via four methods
+<div align="center">
+  <img src="./figure/mr2ct.png" width = '586px' height = '367px'>
+</div>
+
+### Comparison between stroke-trained NICE-GAN and paired-trained NICE-GAN for restoring nidus
+<div align="center">
+  <img src="./figure/stroke.png" width = '586px' height = '367px'>
+</div>
+
 ### Author
 Sheng Hu & Weijie Chen
 
