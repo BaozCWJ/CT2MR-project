@@ -162,7 +162,7 @@ def convolutional_block(X, f, filters, stage, block, s=2):
     return A, params
 
 
-def ResNet50(input_shape=[64, 64, 3], classes=2):
+def ResNet50(input_shape=[256, 256, 1], classes=2):
 
     input_shape=[None]+ input_shape
     params={}
@@ -246,4 +246,3 @@ if __name__ == '__main__':
     A, params = ResNet50()
     pprint.pprint(params, stream=open('ResNet50.json', 'w'), indent=2)
     #pp.pprint(params)
-
