@@ -26,7 +26,7 @@ class Options():
         parser.add_argument('--result_dir', type=str, default='./results', help='models are saved here')
         parser.add_argument('--phase', type=str, default='train', help='[train / test]')
         # model parameters
-        parser.add_argument('--model', type=str, default='cycle_gan', help='chooses which model to use. [cycle_gan | pix2pix | nice_gan | unit ｜mnice_gan]')
+        parser.add_argument('--model', type=str, default='cycle_gan', help='chooses which model to use. [cycle_gan | pix2pix | nice_gan | nice2_gan | unit ｜mnice_gan]')
         parser.add_argument('--input_nc', type=int, default=1, help='# of input image channels: 3 for RGB and 1 for grayscale')
         parser.add_argument('--output_nc', type=int, default=1, help='# of output image channels: 3 for RGB and 1 for grayscale')
         parser.add_argument('--ngf', type=int, default=64, help='# of gen filters in the last conv layer')

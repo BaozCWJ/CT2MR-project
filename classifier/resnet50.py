@@ -175,7 +175,7 @@ def ResNet50(input_shape=[256, 256, 1], classes=2):
 
     # Stage 1
     params['stage1'] = {}
-    A_1, params['stage1']['conv'] = conv2D(X, filters=64, k_size=(7, 7), strides=(2, 2),
+    A_1, params['stage1']['conv'] = conv2D(X, filters=16, k_size=(7, 7), strides=(2, 2),
                                            padding='VALID', name='conv1')
     A_1_bn = batch_norm(A_1, name='bn_conv1')
     A_1_act = tf.nn.relu(A_1_bn)
@@ -187,46 +187,46 @@ def ResNet50(input_shape=[256, 256, 1], classes=2):
 
     # Stage 2
     params['stage2'] = {}
-    A_2_cb, params['stage2']['cb'] = convolutional_block(A_1_pool, f=3, filters=[64, 64, 256],
+    A_2_cb, params['stage2']['cb'] = convolutional_block(A_1_pool, f=3, filters=[16, 16, 64],
                                                          stage=2, block='a', s=1)
-    A_2_ib1, params['stage2']['ib1'] = identity_block(A_2_cb, f=3, filters=[64, 64, 256],
+    A_2_ib1, params['stage2']['ib1'] = identity_block(A_2_cb, f=3, filters=[16, 16, 64],
                                                       stage=2, block='b')
-    A_2_ib2, params['stage2']['ib2'] = identity_block(A_2_ib1, f=3, filters=[64, 64, 256],
+    A_2_ib2, params['stage2']['ib2'] = identity_block(A_2_ib1, f=3, filters=[16, 16, 64],
                                                       stage=2, block='c')
 
     # Stage 3
     params['stage3'] = {}
-    A_3_cb, params['stage3']['cb'] = convolutional_block(A_2_ib2, 3, [128, 128, 512],
+    A_3_cb, params['stage3']['cb'] = convolutional_block(A_2_ib2, 3, [32, 32, 128],
                                                          stage=3, block='a', s=2)
-    A_3_ib1, params['stage3']['ib1'] = identity_block(A_3_cb, 3, [128, 128, 512],
+    A_3_ib1, params['stage3']['ib1'] = identity_block(A_3_cb, 3, [32, 32, 128],
                                                       stage=3, block='b')
-    A_3_ib2, params['stage3']['ib2'] = identity_block(A_3_ib1, 3, [128, 128, 512],
+    A_3_ib2, params['stage3']['ib2'] = identity_block(A_3_ib1, 3, [32, 32, 128],
                                                       stage=3, block='c')
-    A_3_ib3, params['stage3']['ib3'] = identity_block(A_3_ib2, 3, [128, 128, 512],
+    A_3_ib3, params['stage3']['ib3'] = identity_block(A_3_ib2, 3, [32, 32, 128],
                                                       stage=3, block='d')
 
     # Stage 4
     params['stage4'] = {}
-    A_4_cb, params['stage4']['cb'] = convolutional_block(A_3_ib3, 3, [256, 256, 1024],
+    A_4_cb, params['stage4']['cb'] = convolutional_block(A_3_ib3, 3, [64, 64, 256],
                                                          stage=4, block='a', s=2)
-    A_4_ib1, params['stage4']['ib1'] = identity_block(A_4_cb, 3, [256, 256, 1024],
+    A_4_ib1, params['stage4']['ib1'] = identity_block(A_4_cb, 3, [64, 64, 256],
                                                       stage=4, block='b')
-    A_4_ib2, params['stage4']['ib2'] = identity_block(A_4_ib1, 3, [256, 256, 1024],
+    A_4_ib2, params['stage4']['ib2'] = identity_block(A_4_ib1, 3, [64, 64, 256],
                                                       stage=4, block='c')
-    A_4_ib3, params['stage4']['ib3'] = identity_block(A_4_ib2, 3, [256, 256, 1024],
+    A_4_ib3, params['stage4']['ib3'] = identity_block(A_4_ib2, 3, [64, 64, 256],
                                                       stage=4, block='d')
-    A_4_ib4, params['stage4']['ib4'] = identity_block(A_4_ib3, 3, [256, 256, 1024],
+    A_4_ib4, params['stage4']['ib4'] = identity_block(A_4_ib3, 3, [64, 64, 256],
                                                       stage=4, block='e')
-    A_4_ib5, params['stage4']['ib5'] = identity_block(A_4_ib4, 3, [256, 256, 1024],
+    A_4_ib5, params['stage4']['ib5'] = identity_block(A_4_ib4, 3, [64, 64, 256],
                                                       stage=4, block='f')
 
     # Stage 5
     params['stage5'] = {}
-    A_5_cb, params['stage5']['cb'] = convolutional_block(A_4_ib5, 3, [512, 512, 2048],
+    A_5_cb, params['stage5']['cb'] = convolutional_block(A_4_ib5, 3, [128, 128, 512],
                                                          stage=5, block='a', s=2)
-    A_5_ib1, params['stage5']['ib1'] = identity_block(A_5_cb, 3, [512, 512, 2048],
+    A_5_ib1, params['stage5']['ib1'] = identity_block(A_5_cb, 3, [128, 128, 512],
                                                       stage=5, block='b')
-    A_5_ib2, params['stage5']['ib2'] = identity_block(A_5_ib1, 3, [512, 512, 2048],
+    A_5_ib2, params['stage5']['ib2'] = identity_block(A_5_ib1, 3, [128, 128, 512],
                                                       stage=5, block='c')
 
     # Average Pooling

@@ -18,12 +18,12 @@ def read_image(path,img_type):
     for idx,folder in enumerate(cate):
         for im in glob.glob(folder+'/*.jpg'):
             #print('reading the images:%s'%(im))
-            img=io.imread(im,as_grey=True)
+            img=io.imread(im,as_gray=True)
             img=transform.resize(img,(w,h))
             #print(img.shape)
             imgs.append(img)
             labels.append(idx)
-    return np.asarray(imgs,np.float32).reshape((-1,w,h,1)),np.asarray(labels,np.int32)
+    return np.asarray(imgs,np.float32).reshape((-1,w,h,1)),np.asarray(labels,np.int32).reshape((-1,1))
 
 
 
@@ -40,3 +40,15 @@ def minibatches(inputs=None, targets=None, batch_size=None, shuffle=False):
         else:
             excerpt = slice(start_idx, start_idx + batch_size)
         yield inputs[excerpt], targets[excerpt].reshape((-1,1))
+
+
+def index4_4(labels,predictions):
+    TP = np.sum(predictions*labels.T)
+    TN = np.sum((1-predictions)*(1-labels).T)
+    FP = np.sum(predictions*(1-labels).T)
+    FN = np.sum((1-predictions)*labels.T)
+    acc = (TP+TN)/(TP+TN+FP+FN)
+    prec = (TP)/(TP+FP)
+    rec = (TP)/(TP+FN)
+    F1 = 2*prec*rec/(prec+rec)
+    return [TP,TN,FP,FN,acc,prec,rec,F1]
