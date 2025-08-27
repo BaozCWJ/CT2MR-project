@@ -12,6 +12,7 @@ from thop import clever_format
 import cv2
 import os
 import numpy as np
+from tqdm import tqdm
 
 class NICE2(object):
     @staticmethod
@@ -68,6 +69,10 @@ class NICE2(object):
         
         # Cache for intermediate results to avoid recomputation
         self.feature_cache = {}
+        
+        # Performance monitoring
+        self.log_freq = 50  # Print every 50 steps instead of every step
+        self.recent_losses = {'d_loss': [], 'g_loss': []}
         
         if torch.backends.cudnn.enabled and self.benchmark_flag:
             print('set benchmark !')
@@ -182,11 +187,18 @@ class NICE2(object):
             fake_A2B = self.gen2B(real_A_z)
             fake_B2A = self.gen2A(real_B_z)
             
-            # Simple quality metrics
+            # Simple quality metrics - store in progress bar postfix instead of printing
             l1_loss_A2B = self.L1_loss(fake_A2B, real_B).item()
             l1_loss_B2A = self.L1_loss(fake_B2A, real_A).item()
             
-            print(f"[Monitoring] Step {step}: L1_A2B={l1_loss_A2B:.4f}, L1_B2A={l1_loss_B2A:.4f}")
+            # Update progress bar with quality metrics (non-blocking)
+            if hasattr(self, '_current_pbar'):
+                self._current_pbar.set_postfix({
+                    'D_loss': f"{self.recent_losses['d_loss'][-1] if self.recent_losses['d_loss'] else 0:.4f}",
+                    'G_loss': f"{self.recent_losses['g_loss'][-1] if self.recent_losses['g_loss'] else 0:.4f}",
+                    'L1_A2B': f"{l1_loss_A2B:.4f}",
+                    'L1_B2A': f"{l1_loss_B2A:.4f}"
+                })
 
     def train(self):
         loss_A = []
@@ -212,8 +224,18 @@ class NICE2(object):
         print("self.start_iter", self.start_iter)
         print('NICE2 training start with optimizations!')
         start_time = time.time()
+        last_log_time = start_time
 
-        for step in range(self.start_iter, self.iteration + 1):
+        # Create progress bar
+        pbar = tqdm(range(self.start_iter, self.iteration + 1), 
+                   desc="Training", 
+                   unit="step",
+                   ncols=120)
+        
+        # Store reference for lightweight monitoring
+        self._current_pbar = pbar
+
+        for step in pbar:
             if self.decay_flag and step > (self.iteration // 2):
                 self.G_optim.param_groups[0]['lr'] -= (self.lr / (self.iteration // 2))
                 self.D_optim.param_groups[0]['lr'] -= (self.lr / (self.iteration // 2))
@@ -297,7 +319,31 @@ class NICE2(object):
             Generator_loss.backward()
             self.G_optim.step()
 
-            print("[%5d/%5d] time: %4.4f d_loss: %.8f, g_loss: %.8f" % (step, self.iteration, time.time() - start_time, Discriminator_loss, Generator_loss))
+            # Accumulate losses for efficient logging
+            self.recent_losses['d_loss'].append(Discriminator_loss.item())
+            self.recent_losses['g_loss'].append(Generator_loss.item())
+
+            # Update progress bar with current losses (non-blocking)
+            pbar.set_postfix({
+                'D_loss': f"{Discriminator_loss.item():.4f}",
+                'G_loss': f"{Generator_loss.item():.4f}"
+            })
+
+            # Periodic detailed logging (much less frequent)
+            if step % self.log_freq == 0:
+                current_time = time.time()
+                avg_d_loss = sum(self.recent_losses['d_loss']) / len(self.recent_losses['d_loss'])
+                avg_g_loss = sum(self.recent_losses['g_loss']) / len(self.recent_losses['g_loss'])
+                time_per_step = (current_time - last_log_time) / self.log_freq
+                
+                print(f"\n[{step:5d}/{self.iteration:5d}] "
+                      f"avg_d_loss: {avg_d_loss:.6f}, avg_g_loss: {avg_g_loss:.6f}, "
+                      f"time/step: {time_per_step:.3f}s")
+                
+                # Clear accumulated losses
+                self.recent_losses['d_loss'].clear()
+                self.recent_losses['g_loss'].clear()
+                last_log_time = current_time
 
             if step % 1 == 0:
                 loss_A.append([D_loss_A, G_loss_A, (G_ad_loss_GA + G_ad_cam_loss_A + G_ad_loss_LA), G_cycle_loss_A, G_recon_loss_A])
@@ -308,8 +354,8 @@ class NICE2(object):
 
             # Reduced visualization frequency - evaluate every print_freq * 5 steps instead of every print_freq
             if step % self.print_freq == 0:
-                print('current D_learning rate:{}'.format(self.D_optim.param_groups[0]['lr']))
-                print('current G_learning rate:{}'.format(self.G_optim.param_groups[0]['lr']))
+                # Save learning rates to progress bar instead of printing
+                pbar.set_description(f"Training - D_lr: {self.D_optim.param_groups[0]['lr']:.6f}, G_lr: {self.G_optim.param_groups[0]['lr']:.6f}")
                 self.save_path("_params_latest.pt", step)
                 
                 # Lightweight monitoring instead of full evaluation
@@ -322,6 +368,15 @@ class NICE2(object):
             # Memory cleanup every 100 steps
             if step % 100 == 0 and torch.cuda.is_available():
                 torch.cuda.empty_cache()
+
+        # Close progress bar
+        pbar.close()
+        
+        # Final training summary
+        total_time = time.time() - start_time
+        print(f"\nTraining completed!")
+        print(f"Total time: {total_time:.2f}s ({total_time/3600:.2f}h)")
+        print(f"Average time per step: {total_time/(self.iteration-self.start_iter+1):.3f}s")
 
         np.savetxt('loss_log_A', loss_A)
         np.savetxt('loss_log_B', loss_B)
